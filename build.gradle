@@ -1,0 +1,66 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def allureVersion = "2.23.0"
+
+allure {
+    report { // секция репорта
+        version.set("2.23.0")
+    }
+    adapter { // отвечает за появление папочки build/allure-results
+        aspectjWeaver.set(true) // обработка аннотации @Step
+        frameworks {
+            junit5 { //название фреймворка
+                adapterVersion.set("2.23.0") //версия интеграции фреймворка и Allure
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation (
+            'com.codeborne:selenide:6.19.0',
+            'org.junit.jupiter:junit-jupiter:5.9.3',
+            'io.qameta.allure:allure-selenide:2.23.0',
+            'com.github.javafaker:javafaker:1.0.2',
+            'org.slf4j:slf4j-simple:2.0.7',
+            'org.slf4j:slf4j-api:2.0.7'
+    )
+}
+tasks.withType(Test) {
+    useJUnitPlatform()
+    systemProperties(System.getProperties())
+
+    testLogging {
+        lifecycle {
+            events "STARTED", "PASSED", "FAILED", "STANDARD_ERROR", "STANDARD_OUT"
+            exceptionFormat "short"
+        }
+    }
+}
+
+test {
+    options {
+        systemProperties(System.getProperties())
+    }
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
+    useJUnitPlatform()
+}
+
+task simple_test(type: Test){
+    useJUnitPlatform{
+        includeTags("remote")
+    }
+}
+task registration_test(type: Test){
+    useJUnitPlatform {
+        includeTags("registration")
+    }
+}
