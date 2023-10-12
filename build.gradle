@@ -3,6 +3,10 @@ plugins {
     id 'io.qameta.allure' version '2.11.2'
 }
 
+repositories {
+    mavenCentral()
+}
+
 def allureVersion = "2.23.0"
 
 allure {
@@ -19,13 +23,6 @@ allure {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
-group 'guru.qa'
-version '1.0'
-
 dependencies {
     testImplementation (
             'com.codeborne:selenide:6.19.0',
@@ -36,32 +33,34 @@ dependencies {
             'org.slf4j:slf4j-api:2.0.7'
     )
 }
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
+tasks.withType(Test) {
+    useJUnitPlatform()
+    systemProperties(System.getProperties())
 
-task remote_test(type: Test) {
-    useJUnitPlatform {
-        includeTags("remote")
-    }
-
-    test {
-        useJUnitPlatform()
+    testLogging {
+        lifecycle {
+            events "STARTED", "PASSED", "FAILED", "STANDARD_ERROR", "STANDARD_OUT"
+            exceptionFormat "short"
+        }
     }
 }
-
-dependencies {
-    testImplementation(
-            'com.codeborne:selenide:6.16.0',
-            'com.github.javafaker:javafaker:1.0.2',
-            'org.junit.jupiter:junit-jupiter:5.9.3',
-            'io.qameta.allure:allure-selenide:2.23.0',
-            'com.codeborne:selenide:6.17.1'
-    )
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.3')
-}
-
 
 test {
+    options {
+        systemProperties(System.getProperties())
+    }
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
     useJUnitPlatform()
+}
+
+task simple_test(type: Test){
+    useJUnitPlatform{
+        includeTags("remote")
+    }
+}
+task registration_test(type: Test){
+    useJUnitPlatform {
+        includeTags("registration")
+    }
 }
